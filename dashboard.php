@@ -121,6 +121,7 @@ $current = 'dashboard';
                         <span class="text-muted" style="font-size:12px;"><i class="fa fa-lock"></i> Keine Berechtigung für Server-Aktionen</span>
                         <?php endif; ?>
                     </div>
+                    <div id="action-msg" style="display:none; font-size:12px; margin-top:6px;"></div>
                 </div>
 
                 <div class="status-box-body">
@@ -171,75 +172,12 @@ $current = 'dashboard';
 
 <script src="assets/js/jquery.min.js"></script>
 <script src="assets/js/bootstrap.min.js"></script>
+<script>
+// canControl wird VOR dashboard.js definiert, damit dashboard.js darauf zugreifen kann
+const canControl = <?php echo ($perm >= 3) ? 'true' : 'false'; ?>;
+</script>
 <script src="dashboard.js"></script>
 <script>
-const canControl = <?php echo ($perm >= 3) ? 'true' : 'false'; ?>;
-
-function setServerOnline(online) {
-    document.getElementById('srv-status-online').style.display  = online ? '' : 'none';
-    document.getElementById('srv-status-offline').style.display = online ? 'none' : '';
-    if (canControl) {
-        document.querySelectorAll('.btn-when-online').forEach(b => b.style.display = online ? '' : 'none');
-        document.querySelectorAll('.btn-when-offline').forEach(b => b.style.display = online ? 'none' : '');
-    }
-}
-
-function setBar(id, pct, warnAt, dangerAt) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.style.width = Math.min(pct, 100) + '%';
-    el.className = 'bar-fill';
-    if      (pct >= dangerAt) el.classList.add('bar-danger');
-    else if (pct >= warnAt)   el.classList.add('bar-warning');
-    else                      el.classList.add('bar-success');
-}
-
-const _origUpdate = window.update;
-window.update = async function() {
-    if (_origUpdate) await _origUpdate();
-    try {
-        const res = await fetch("metrics.php");
-        if (!res.ok) { setServerOnline(false); return; }
-        const data = await res.json();
-        if (!data || data.length === 0) { setServerOnline(false); return; }
-
-        let isOnline = false;
-        let ramMax = 0;
-
-        // Ersten Pass: RAM Max ermitteln
-        data.forEach(m => {
-            if (m.title === 'JVM RAM Max') ramMax = parseFloat(m.raw) || 0;
-        });
-
-        data.forEach(m => {
-            const key = m.title.toLowerCase();
-            const raw = parseFloat(m.raw) || 0;
-
-            if (key === 'tps') {
-                document.getElementById('cpu-text').textContent = 'TPS: ' + m.value;
-                setBar('cpu-bar', Math.min((raw / 20) * 100, 100), 70, 90);
-                if (raw > 0) isOnline = true;
-            }
-            if (key === 'jvm ram belegt') {
-                document.getElementById('ram-text').textContent = m.value;
-                const pct = ramMax > 0 ? (raw / ramMax) * 100 : 0;
-                setBar('ram-bar', pct, 70, 90);
-            }
-            if (key === 'weltgröße (größte)') {
-                document.getElementById('ssd-text').textContent = m.value;
-                setBar('ssd-bar', Math.min(raw / 1e10 * 100, 100), 60, 85);
-            }
-            if (key.includes('version')) {
-                document.getElementById('srv-version').textContent = m.value;
-            }
-        });
-
-        setServerOnline(isOnline);
-    } catch(e) {
-        setServerOnline(false);
-    }
-};
-
 async function srvAction(action) {
     if (!canControl) return;
     const labels = { stop:'Stoppen', start:'Starten', 'force-stop':'Stop erzwingen', reload:'Reload' };
@@ -247,7 +185,7 @@ async function srvAction(action) {
 
     const msg = document.getElementById('action-msg');
     msg.style.display = '';
-    msg.className = 'text-muted';
+    msg.style.color = '#888';
     msg.textContent = 'Sende Befehl…';
 
     try {
@@ -257,10 +195,10 @@ async function srvAction(action) {
             body: JSON.stringify({ action })
         });
         const d = await r.json();
-        msg.className = d.ok ? 'text-success' : 'text-danger';
+        msg.style.color = d.ok ? '#27ae60' : '#e74c3c';
         msg.textContent = d.response || (d.ok ? 'OK' : 'Fehler');
     } catch(e) {
-        msg.className = 'text-danger';
+        msg.style.color = '#e74c3c';
         msg.textContent = 'Netzwerkfehler: ' + e.message;
     }
 }

@@ -49,6 +49,22 @@ if ($user['permissions'] >= 1) {
         "unit" => "ms",
         "order" => 4
     ];
+    $config["mc_jvm_memory_allocated"] = [
+        "title" => "JVM RAM Belegt",
+        "unit" => "bytes",
+        "order" => 12
+    ];
+    $config["mc_jvm_memory_max"] = [
+        "title" => "JVM RAM Max",
+        "unit" => "bytes",
+        "order" => 11
+    ];
+    $config["mc_world_size"] = [
+        "title" => "Weltgröße (größte)",
+        "unit" => "bytes",
+        "order" => 9,
+        "max_label" => true
+    ];
 
     // SPIELER (nur summierte Zahlen)
     $config["mc_players_online_total"] = [
@@ -93,28 +109,11 @@ if ((int)$user['permissions'] >= 2) {
 
 // ===== WELTEN, JVM & GC (nur Permissions = 3) =====
 if ($user['permissions'] == 3) {
-    $config["mc_world_size"] = [
-        "title" => "Weltgröße (größte)",
-        "unit" => "bytes",
-        "order" => 9,
-        "max_label" => true
-    ];
     $config["mc_loaded_chunks_total"] = [
         "title" => "Geladene Chunks",
         "unit" => "count",
         "order" => 10,
         "sum_labels" => true
-    ];
-
-    $config["mc_jvm_memory_max"] = [
-        "title" => "JVM RAM Max",
-        "unit" => "bytes",
-        "order" => 11
-    ];
-    $config["mc_jvm_memory_allocated"] = [
-        "title" => "JVM RAM Belegt",
-        "unit" => "bytes",
-        "order" => 12
     ];
     $config["mc_jvm_memory_free"] = [
         "title" => "JVM RAM Frei",
@@ -155,9 +154,12 @@ if ($user['permissions'] == 3) {
 
 /* ------------------------------------------------------------------ */
 
-$raw = @file_get_contents("http://127.0.0.1:9940/metrics");
+$ctx = stream_context_create(['http' => ['timeout' => 4]]);
+$raw = @file_get_contents("http://127.0.0.1:9940/metrics", false, $ctx);
 if ($raw === false) {
-    http_response_code(500);
+    header("Content-Type: application/json");
+    http_response_code(503);
+    echo json_encode(["error" => "offline", "message" => "Prometheus nicht erreichbar"]);
     exit;
 }
 

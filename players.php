@@ -14,7 +14,7 @@ $canEdit = ($perm >= 3);
 
 // Dateipfade
 $files = [
-    'whitelist' => '/home/timo/scoutsmp/whitelist.json',
+    'whitelist' => 'D:\timot\Testserver\whitelist.json',
     'ops'       => '/home/timo/scoutsmp/ops.json',
     'bans'      => '/home/timo/scoutsmp/banned-players.json',
 ];
@@ -34,11 +34,23 @@ if ($canEdit && $_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'remove') {
             $data = array_values(array_filter($data, fn($p) => strtolower($p['name']) !== strtolower($name)));
         } elseif ($action === 'add') {
-            // UUID via Mojang-API holen (optional, Fallback leer)
-            $mojang = @json_decode(@file_get_contents("https://api.mojang.com/users/profiles/minecraft/$name"), true);
-            $uuid = isset($mojang['id']) ? (
-                substr($mojang['id'],0,8).'-'.substr($mojang['id'],8,4).'-'.substr($mojang['id'],12,4).'-'.substr($mojang['id'],16,4).'-'.substr($mojang['id'],20)
-            ) : '';
+            // UUID via Mojang-API holen
+            $ctx = stream_context_create(['http' => ['timeout' => 5]]);
+            $mojangRaw = @file_get_contents("https://api.mojang.com/users/profiles/minecraft/$name", false, $ctx);
+            $mojang = $mojangRaw ? @json_decode($mojangRaw, true) : null;
+
+            if (isset($mojang['id']) && strlen($mojang['id']) === 32) {
+                // Online-UUID mit Bindestrichen formatieren
+                $id = $mojang['id'];
+                $uuid = substr($id,0,8).'-'.substr($id,8,4).'-'.substr($id,12,4).'-'.substr($id,16,4).'-'.substr($id,20);
+            } else {
+                // Fallback: Offline-UUID (UUID v3 von "OfflinePlayer:<Name>") – Standard-MC-Offline-Modus
+                $hash = md5("OfflinePlayer:" . $name);
+                // Version-Bits setzen: Version 3 → 3xxx, Variant → 10xx
+                $hash[12] = '3';
+                $hash[16] = dechex(hexdec($hash[16]) & 0x3 | 0x8);
+                $uuid = substr($hash,0,8).'-'.substr($hash,8,4).'-'.substr($hash,12,4).'-'.substr($hash,16,4).'-'.substr($hash,20);
+            }
             // Doppelte vermeiden
             $exists = array_filter($data, fn($p) => strtolower($p['name']) === strtolower($name));
             if (!$exists) {

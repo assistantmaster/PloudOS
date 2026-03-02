@@ -17,7 +17,8 @@ if ((int)$user['permissions'] < 2) {
 
 header('Content-Type: application/json');
 
-$raw = @file_get_contents('http://127.0.0.1:9940/metrics');
+$ctx = stream_context_create(['http' => ['timeout' => 4]]);
+$raw = @file_get_contents('http://127.0.0.1:9940/metrics', false, $ctx);
 if ($raw === false) {
     echo json_encode(['ok' => false, 'error' => 'Prometheus nicht erreichbar']);
     exit();

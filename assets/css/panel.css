@@ -216,7 +216,7 @@ body.panel-layout .footer a {
 
 .resource-bar .bar-fill.bar-warning { background-color: #ff7518; }
 .resource-bar .bar-fill.bar-danger  { background-color: #ff0039; }
-.resource-bar .bar-fill.bar-success { background-color: #3fb618; }
+.resource-bar .bar-fill.bar-success { background-color: #2780e3; }
 
 /* ---- METRIKEN GRID (für metrics.php) ---- */
 .metrics-grid {
@@ -359,20 +359,26 @@ body.panel-layout .footer a {
         overflow-x: auto;
     }
     .sidebar ul {
-        display: flex;
-        flex-direction: row;
-        width: max-content;
+        display: block;
+        width: 100%;
+    }
+    .sidebar ul li {
+        display: block;
+        width: 100%;
     }
     .sidebar ul li a {
+        display: block;
+        border-bottom: none;
         border-left: none;
-        border-bottom: 3px solid transparent;
-        padding: 10px 14px;
-        white-space: nowrap;
+        border-radius: 0;
+        padding: 12px 16px;
+        white-space: normal;
     }
     .sidebar ul li.active a,
     .sidebar ul li a.active {
-        border-bottom-color: #3c7542;
-        border-left: none;
+        border-bottom-color: #4673E2;
+        background-color: #4673E2;
+        color: #fff;
     }
     .panel-wrapper {
         flex-direction: column;
@@ -380,5 +386,15 @@ body.panel-layout .footer a {
     .panel-content {
         margin-left: 0;
         padding: 15px;
+    }
+    .status-box .status-box-body {
+        display: block;
+        width: 100%;
+        padding: 16px 10px;
+        box-sizing: border-box;
+    }
+    .status-section {
+        flex-direction: column;
+        gap: 12px;
     }
 }
