@@ -14,9 +14,10 @@ $canEdit = ($perm >= 3);
 
 // Dateipfade
 $files = [
-    'whitelist' => 'D:\timot\Testserver\whitelist.json',
+    'whitelist' => '/home/timo/scoutsmp/whitelist.json',
     'ops'       => '/home/timo/scoutsmp/ops.json',
     'bans'      => '/home/timo/scoutsmp/banned-players.json',
+    'ipbans'    => '/home/timo/scoutsmp/banned-ips.json',
 ];
 
 // POST-Handler: Spieler hinzufügen / entfernen (nur perm >= 3)
@@ -25,6 +26,24 @@ if ($canEdit && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $list   = $_POST['list']   ?? '';
     $name   = trim($_POST['name'] ?? '');
     $uuid   = trim($_POST['uuid'] ?? '');
+
+    // IP-Bans separat behandeln
+    if ($list === 'ipbans') {
+        $ip   = trim($_POST['ip'] ?? '');
+        $path = $files['ipbans'];
+        $data = is_readable($path) ? json_decode(file_get_contents($path), true) : [];
+        if (!is_array($data)) $data = [];
+        if ($action === 'remove' && $ip !== '') {
+            $data = array_values(array_filter($data, fn($p) => ($p['ip'] ?? '') !== $ip));
+        } elseif ($action === 'add' && $ip !== '') {
+            $exists = array_filter($data, fn($p) => ($p['ip'] ?? '') === $ip);
+            if (!$exists) {
+                $data[] = ['ip' => $ip, 'created' => date('Y-m-d H:i:s +0000'), 'source' => 'Dashboard', 'expires' => 'forever', 'reason' => 'Banned by admin'];
+            }
+        }
+        file_put_contents($path, json_encode(array_values($data), JSON_PRETTY_PRINT));
+        header("Location: players.php"); exit();
+    }
 
     if (in_array($list, ['whitelist', 'ops', 'bans']) && $name !== '') {
         $path = $files[$list];
@@ -134,52 +153,8 @@ function playerHead(string $name): string {
     </style>
 </head>
 <body class="panel-layout">
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
-                <span class="sr-only">Navigation umschalten</span>
-                <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="index.php"><img alt="Logo" height="50" src="assets/PloudOS-Small.png"></a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="index.php">Startseite</a></li>
-                <li><a href="#">Über uns</a></li>
-                <li><a href="#">Twitter</a></li>
-                <li><a href="#">Discord</a></li>
-                <li><a href="#">FAQ</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href="dashboard.php">Server verwalten</a></li>
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                        <?php echo htmlspecialchars($user['username']); ?> <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a href="update_profile.php"><i class="fa fa-pencil"></i> Profil bearbeiten</a></li>
-                        <li class="divider"></li>
-                        <li><a href="logout.php"><i class="fa fa-sign-out"></i> Abmelden</a></li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<?php include 'nav_helper.php'; ?>
 <div class="panel-wrapper">
-    <div class="sidebar">
-        <ul>
-            <li><a href="dashboard.php">Übersicht</a></li>
-            <li><a href="console.php">Konsole</a></li>
-            <li><a href="config.php">Konfiguration</a></li>
-            <li><a href="plugins.php">Plugins</a></li>
-            <li><a href="stats.php">Player-Stats</a></li>
-            <li><a href="bluemap.php">BlueMap</a></li>
-            <li><a href="screenshots.php">Screenshots &amp; Waypoints</a></li>
-            <li class="active"><a href="players.php">Spieler</a></li>
-        </ul>
-    </div>
     <div class="panel-content">
         <div class="page-header">
             <h2>Spieler</h2>
@@ -281,6 +256,42 @@ function playerHead(string $name): string {
                     <input type="hidden" name="list"   value="bans">
                     <input type="text"   name="name"   placeholder="Benutzername" required>
                     <button type="submit" class="btn-add" title="Bannen"><i class="fa fa-plus"></i></button>
+                </form>
+                <?php endif; ?>
+            </div>
+
+            <!-- IP-BANS -->
+            <div class="player-section">
+                <div class="section-title">IP-Bans</div>
+                <?php if (empty($ipbans)): ?>
+                    <div class="empty-hint">Keine gebannten IPs.</div>
+                <?php else: ?>
+                <?php foreach ($ipbans as $p): ?>
+                <div class="player-row">
+                    <i class="fa fa-globe" style="margin-right:10px;color:#e74c3c;font-size:18px;width:28px;"></i>
+                    <span class="player-name">
+                        <?php echo htmlspecialchars($p['ip'] ?? '?'); ?>
+                        <?php if (!empty($p['reason'])): ?>
+                        <span class="ban-reason"><?php echo htmlspecialchars($p['reason']); ?></span>
+                        <?php endif; ?>
+                    </span>
+                    <?php if ($canEdit): ?>
+                    <form method="post" style="margin:0;">
+                        <input type="hidden" name="action" value="remove">
+                        <input type="hidden" name="list"   value="ipbans">
+                        <input type="hidden" name="ip"     value="<?php echo htmlspecialchars($p['ip'] ?? ''); ?>">
+                        <button type="submit" class="btn-remove" title="Entsperren"><i class="fa fa-times"></i></button>
+                    </form>
+                    <?php endif; ?>
+                </div>
+                <?php endforeach; ?>
+                <?php endif; ?>
+                <?php if ($canEdit): ?>
+                <form method="post" class="add-row">
+                    <input type="hidden" name="action" value="add">
+                    <input type="hidden" name="list"   value="ipbans">
+                    <input type="text"   name="ip"     placeholder="IP-Adresse" required>
+                    <button type="submit" class="btn-add" title="IP bannen"><i class="fa fa-plus"></i></button>
                 </form>
                 <?php endif; ?>
             </div>

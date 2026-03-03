@@ -108,7 +108,7 @@ if ((int)$user['permissions'] >= 2) {
 }
 
 // ===== WELTEN, JVM & GC (nur Permissions = 3) =====
-if ($user['permissions'] == 3) {
+if ($user['permissions'] >= 3) {
     $config["mc_loaded_chunks_total"] = [
         "title" => "Geladene Chunks",
         "unit" => "count",

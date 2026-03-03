@@ -14,6 +14,10 @@ $navItems = [
     'screenshots' => ['url' => 'screenshots.php',  'label' => 'Screenshots &amp; Waypoints'],
     'players'     => ['url' => 'players.php',      'label' => 'Spieler'],
 ];
+if ($perm >= 3) {
+    $navItems['backups'] = ['url' => 'backups.php', 'label' => 'Backups', 'admin' => true];
+    $navItems['users']   = ['url' => 'users.php',   'label' => 'Benutzer', 'admin' => true];
+}
 ?>
 <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
@@ -58,8 +62,11 @@ $navItems = [
 <?php if (isset($navItems)): ?>
 <div class="sidebar">
     <ul>
-        <?php foreach ($navItems as $key => $item): ?>
-        <li class="<?= ($current ?? '') === $key ? 'active' : '' ?>">
+        <?php $adminSepShown = false; foreach ($navItems as $key => $item): ?>
+        <?php if (!empty($item['admin']) && !$adminSepShown): $adminSepShown = true; ?>
+        <li class="sidebar-sep" style="border-top:1px solid #444;margin:6px 0;padding:0;height:1px;list-style:none;pointer-events:none;"></li>
+        <?php endif; ?>
+        <li class="<?= ($current ?? '') === $key ? 'active' : '' ?>" <?= !empty($item['admin']) ? 'style="opacity:0.85;"' : '' ?>>
             <a href="<?= $item['url'] ?>"><?= $item['label'] ?></a>
         </li>
         <?php endforeach; ?>
