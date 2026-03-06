@@ -102,11 +102,30 @@ $current = 'dashboard';
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-bar-chart"></i> Live Metriken</h3>
+                <h3 class="panel-title"> Live Metriken</h3>
             </div>
             <div class="panel-body">
                 <input class="form-control" id="search" placeholder="Metriken filtern…" style="margin-bottom:14px; max-width:360px;">
                 <div id="metrics" class="metrics-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Server-Aktion bestätigen -->
+<div class="modal fade" id="srvActionModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title" id="srv-action-title">Server-Aktion bestätigen</h4>
+            </div>
+            <div class="modal-body">
+                <p id="srv-action-msg">Bist du sicher, dass du diese Aktion ausführen willst?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Abbrechen</button>
+                <button type="button" class="btn btn-danger" id="srv-action-confirm">Bestätigen</button>
             </div>
         </div>
     </div>
@@ -126,33 +145,65 @@ $current = 'dashboard';
 <script>
 // canControl wird VOR dashboard.js definiert, damit dashboard.js darauf zugreifen kann
 const canControl = <?php echo ($perm >= 3) ? 'true' : 'false'; ?>;
-</script>
-<script src="dashboard.js"></script>
-<script>
-async function srvAction(action) {
-    if (!canControl) return;
-    const labels = { stop:'Stoppen', start:'Starten', 'force-stop':'Stop erzwingen', reload:'Reload' };
-    if (!confirm(labels[action] + ' – Bist du sicher?')) return;
 
+let pendingSrvAction = null;
+function srvAction(action) {
+    if (!canControl) return;
+    const labels = {
+        stop: 'Stoppen',
+        start: 'Starten',
+        'force-stop': 'Stop erzwingen',
+        reload: 'Reload'
+    };
+    const questions = {
+        stop: 'Möchtest du den Server wirklich stoppen? Alle Spieler werden getrennt.',
+        'force-stop': 'Möchtest du wirklich einen Stop erzwingen? Dies kann zu Datenverlust führen!'
+    };
+    if (action === 'stop' || action === 'force-stop') {
+        document.getElementById('srv-action-title').innerHTML = 'Server-Aktion bestätigen';
+        document.getElementById('srv-action-msg').textContent = questions[action] || (labels[action] + ' – Bist du sicher?');
+        pendingSrvAction = action;
+        $('#srvActionModal').modal('show');
+    } else {
+        // Direkt ausführen
+        executeSrvAction(action);
+    }
+}
+
+function executeSrvAction(action) {
     const msg = document.getElementById('action-msg');
     msg.style.display = '';
     msg.style.color = '#888';
     msg.textContent = 'Sende Befehl…';
-
-    try {
-        const r = await fetch('rcon.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action })
-        });
-        const d = await r.json();
+    fetch('rcon.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action })
+    })
+    .then(r => r.json())
+    .then(d => {
         msg.style.color = d.ok ? '#27ae60' : '#e74c3c';
         msg.textContent = d.response || (d.ok ? 'OK' : 'Fehler');
-    } catch(e) {
+    })
+    .catch(e => {
         msg.style.color = '#e74c3c';
         msg.textContent = 'Netzwerkfehler: ' + e.message;
-    }
+    });
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmBtn = document.getElementById('srv-action-confirm');
+    if (confirmBtn) {
+        confirmBtn.onclick = function() {
+            if (!pendingSrvAction) return;
+            $('#srvActionModal').modal('hide');
+            const action = pendingSrvAction;
+            pendingSrvAction = null;
+            executeSrvAction(action);
+        };
+    }
+});
 </script>
+<script src="dashboard.js"></script>
 </body>
 </html>

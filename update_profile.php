@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (!$break) {
             $stmt = $db->prepare("UPDATE users SET first_name = ?, last_name = ?, tel = ?, birth = ? WHERE username = ?");
             $stmt->execute([$first, $last, $tel, $birth, $user['username']]);
-            header("Location: index.php");
+            header("Location: dasboard.php");
             exit();
         }
     } else {
@@ -60,35 +60,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <link rel="stylesheet" href="assets/css/font-awesome.min.css">
     <link rel="stylesheet" href="assets/css/cosmo-bootstrap.min.css">
     <link rel="stylesheet" href="assets/css/page.css">
+    <style>
+        /* Panel-Elemente (blaue Menü-Items) ausblenden */
+        .sidebar {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container">
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false">
-                <span class="sr-only">Navigation umschalten</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="index.php">
-                <img alt="Logo" height="50" src="assets/PloudOS-Small.png">
-            </a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-            <ul class="nav navbar-nav">
-                <li><a href="index.php"><i class="fa fa-home"></i> Dashboard</a></li>
-                <li><a href="dashboard.php"><i class="fa fa-tachometer"></i> Live Metriken</a></li>
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="active"><a href="update_profile.php"><i class="fa fa-user"></i> Profil</a></li>
-                <li><a href="logout.php"><i class="fa fa-sign-out"></i> Abmelden</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
+<?php include "nav_helper.php" ?>
 <div class="page">
     <h1>Profil bearbeiten</h1>
 
@@ -100,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-lock"></i> Identität bestätigen</h3>
+                <h3 class="panel-title">Identität bestätigen</h3>
             </div>
             <div class="panel-body">
                 <div class="form-group" style="max-width:400px;">
@@ -153,7 +133,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <i class="fa fa-check"></i> Änderungen speichern
         </button>
         &nbsp;
-        <a href="index.php" class="btn btn-default">Abbrechen</a>
+        <a href="dashboard.php" class="btn btn-default">Abbrechen</a>
 
     </form>
 </div>

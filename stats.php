@@ -44,7 +44,6 @@ $current = 'stats';
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h3 class="panel-title">
-                    <i class="fa fa-user"></i>
                     Statistiken für <strong><?= htmlspecialchars($user['username']) ?></strong>
                     <span id="stat-count" class="stat-count" style="margin-left:10px;"></span>
                 </h3>

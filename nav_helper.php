@@ -26,16 +26,16 @@ if ($perm >= 3) {
                 <span class="sr-only">Navigation umschalten</span>
                 <span class="icon-bar"></span><span class="icon-bar"></span><span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="index.php">
+            <a class="navbar-brand" href="dashboard.php">
                 <img alt="Logo" height="50" src="assets/PloudOS-Small.png">
             </a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="index.php">Startseite</a></li>
+                <li><a href="dashboard.php">Startseite</a></li>
                 <li><a href="#">Über uns</a></li>
                 <li><a href="#">Twitter</a></li>
-                <li><a href="#">Discord</a></li>
+                <li><a href="https://discord.gg/mg8zcK9ZVa">Discord</a></li>
                 <li><a href="#">FAQ</a></li>
             </ul>
             <ul class="nav navbar-nav navbar-right">

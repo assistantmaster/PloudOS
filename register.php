@@ -154,9 +154,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         </div>
 
-        <button type="submit" class="btn btn-success">
-            <i class="fa fa-user-plus"></i> Account erstellen
-        </button>
+        <button type="submit" class="btn btn-success">Account erstellen</button>
         &nbsp;
         <a href="login.php" class="btn btn-default">Zurück zum Login</a>
 

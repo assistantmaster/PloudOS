@@ -22,6 +22,7 @@ if (!empty($user['first_name']) && !empty($user['last_name'])) {
 } else {
     $user_mention = $user['username'];
 }
+header("Location: dashboard.php");
 ?>
 <!DOCTYPE html>
 <html lang="de">

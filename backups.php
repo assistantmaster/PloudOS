@@ -101,7 +101,7 @@ $totalSize = array_sum(array_column($backups, 'size'));
 <div class="panel-wrapper">
     <div class="panel-content">
         <div class="page-header">
-            <h2><i class="fa fa-hdd-o"></i> Backups</h2>
+            <h2>Backups</h2>
         </div>
 
         <!-- Statistiken -->
@@ -123,7 +123,7 @@ $totalSize = array_sum(array_column($backups, 'size'));
         <!-- Backup erstellen -->
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-plus-circle"></i> Neues Backup erstellen</h3>
+                <h3 class="panel-title">Neues Backup erstellen</h3>
             </div>
             <div class="panel-body">
                 <p style="font-size:13px;color:#666;margin-bottom:10px;">
@@ -148,7 +148,7 @@ $totalSize = array_sum(array_column($backups, 'size'));
         <!-- Backup-Liste -->
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-list"></i> Vorhandene Backups</h3>
+                <h3 class="panel-title">Vorhandene Backups</h3>
             </div>
             <div class="panel-body" style="padding:0;">
                 <?php if (empty($backups)): ?>

@@ -118,7 +118,7 @@ $permLabels = [
 <?php include 'nav_helper.php'; ?>
 <div class="panel-wrapper">
     <div class="panel-content">
-        <div class="page-header"><h2><i class="fa fa-users"></i> Benutzerverwaltung</h2></div>
+        <div class="page-header"><h2>Benutzerverwaltung</h2></div>
 
         <?php if ($msg): ?>
         <div class="alert alert-<?= $msgType ?>"><?= $msg ?></div>
@@ -150,7 +150,7 @@ $permLabels = [
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-list"></i> Alle Benutzer</h3>
+                <h3 class="panel-title">Alle Benutzer</h3>
             </div>
             <div class="panel-body" style="padding:0;">
                 <table class="user-table">
@@ -274,8 +274,7 @@ $permLabels = [
                     <p>Benutzer: <strong id="pw-uname"></strong></p>
                     <div class="form-group">
                         <label>Neues Passwort</label>
-                        <input type="password" name="new_password" class="form-control"
-                               placeholder="Mindestens 6 Zeichen" required minlength="6">
+                        <input type="password" name="new_password" class="form-control" placeholder="Passwort">
                     </div>
                 </div>
                 <div class="modal-footer">

@@ -11,7 +11,7 @@ $user = $stmt->fetch(PDO::FETCH_ASSOC);
 $current = 'bluemap';
 
 // BlueMap URL anpassen (Standard: Port 8100)
-$bluemapUrl = 'http://localhost:8100';
+$bluemapUrl = 'http://192.168.178.106:8100';
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -57,7 +57,7 @@ $bluemapUrl = 'http://localhost:8100';
 <div class="panel-wrapper">
     <div class="panel-content">
         <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;">
-            <h2><i class="fa fa-globe"></i> BlueMap</h2>
+            <h2>BlueMap</h2>
             <a href="<?= htmlspecialchars($bluemapUrl) ?>" target="_blank" class="btn btn-default btn-sm">
                 <i class="fa fa-external-link"></i> In neuem Tab öffnen
             </a>
